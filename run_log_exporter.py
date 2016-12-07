@@ -1,23 +1,42 @@
 import re
 import requests
 
-run_log_session = requests.session()
-run_log_session.post('https://run-log.com/account/login/', data={'username':'Rysmen', 'password':'testowe'})
 
-r = run_log_session.get('https://run-log.com/training/list')
+def open_run_log_session(user, passwd):
+    run_log_session = requests.session()
+    run_log_session.post('https://run-log.com/account/login/', data={'username': user,
+                                                                     'password': passwd})
+    return run_log_session
 
-pages = re.findall('page=\d+', r.text)
-max_page = max([int(i.replace('page=', '')) for i in pages])
 
-print(max_page)
-n = []
+def get_num_of_pages(session):
+    def extract_pagenum(page_str):
+        return int(page_str.replace('page=', ''))
+    training_list = session.get('https://run-log.com/training/list')
+    pages = re.findall('page=\d+', training_list.text)
+    num_of_page = max([extract_pagenum(page_str) for page_str in pages])
+    print('Found {} pages of training to download.'.format(num_of_page))
+    return num_of_page
 
-for i in range(1, max_page + 1):
-    print(i)
-    r = run_log_session.get('https://run-log.com/training/list?page={}'.format(i))
-    m = re.findall('show_workout\(\d+', r.text)
-    n += [int(j.replace('show_workout(', '')) for j in m]
-        
+
+run_log_session = open_run_log_session('Rysmen', 'testowe')
+
+
+def get_workouts(session, num_of_pages):
+    def extract_id(s):
+        return int(s.replace('show_workout(', ''))
+
+    n = []
+    for page_num in range(1, num_of_pages + 1):
+        print(page_num)
+        page_code = session.get('https://run-log.com/training/list?page={}'.format(page_num))
+        workouts = re.findall('show_workout\(\d+', page_code.text)
+        n += [extract_id(workout_str) for workout_str in workouts]
+    return n
+
+
+n = get_workouts(run_log_session, get_num_of_pages(run_log_session))
+
 k = []
 
 for number, i in enumerate(n):
@@ -31,17 +50,18 @@ for number, i in enumerate(n):
         print('No gpx!')
         pass
 
+
 b = 0
 
 for i, d in k:
     r = run_log_session.get('https://run-log.com/tracks/export_workout_track/Rysmen/{}/gpx'.format(i))
     a = re.sub('\d+-\d+-\d+', d, r.text)
-    with open("dupa/{}_{}.gpx".format(d,i),"w") as f:
+    with open("dupa/{}_{}.gpx".format(d, i), "w") as f:
         print('{}/{}'.format(b, len(k)))
         b += 1
         f.write(a)
 
 print(a)
-print(n) 
+print(n)
 print(k)
 print(len(n))
