@@ -19,36 +19,39 @@ def get_num_of_pages(session):
     return num_of_page
 
 
-run_log_session = open_run_log_session('Rysmen', 'testowe')
-
-
-def get_workouts(session, num_of_pages):
+def workout_ids(session, num_of_pages):
     def extract_id(s):
         return int(s.replace('show_workout(', ''))
-
-    n = []
-    for page_num in range(1, num_of_pages + 1):
+    def ids_from_page(page_num):
         print(page_num)
         page_code = session.get('https://run-log.com/training/list?page={}'.format(page_num))
         workouts = re.findall('show_workout\(\d+', page_code.text)
-        n += [extract_id(workout_str) for workout_str in workouts]
-    return n
+        return [extract_id(workout_str) for workout_str in workouts]
+    ids = []
+    for page_num in range(1, num_of_pages + 1):
+        ids += ids_from_page()
+    return ids
 
 
-n = get_workouts(run_log_session, get_num_of_pages(run_log_session))
+run_log_session = open_run_log_session('Rysmen', 'testowe')
+n = workout_ids(run_log_session, get_num_of_pages(run_log_session))
 
-k = []
 
-for number, i in enumerate(n):
-    q = run_log_session.get('https://run-log.com/workout/workout_show/{}'.format(i))
-    print('{}/{}'.format(number, len(n)))
-    try:
-        z = re.findall('wt_id&quot;: \d+', q.text)[0]
-        c = re.findall('Data:</span><span class="value">\d+-\d+-\d+', q.text)[0]
-        k.append((z.replace('wt_id&quot;: ', ''), c.replace('Data:</span><span class="value">', '')))
-    except:
-        print('No gpx!')
-        pass
+def gpx_ids(session):
+    k = []
+    for number, i in enumerate(n):
+        q = session.get('https://run-log.com/workout/workout_show/{}'.format(i))
+        print('{}/{}'.format(number, len(n)))
+        try:
+            z = re.findall('wt_id&quot;: \d+', q.text)[0]
+            c = re.findall('Data:</span><span class="value">\d+-\d+-\d+', q.text)[0]
+            k.append((z.replace('wt_id&quot;: ', ''), c.replace('Data:</span><span class="value">', '')))
+        except:
+            print('No gpx!')
+            pass
+    return k
+
+k = gpx_ids()
 
 
 b = 0
