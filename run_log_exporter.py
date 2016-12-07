@@ -58,6 +58,7 @@ b = 0
 for i, d in k:
     r = run_log_session.get('https://run-log.com/tracks/export_workout_track/Rysmen/{}/gpx'.format(i))
     a = re.sub('\d+-\d+-\d+', d, r.text)
+    a = re.sub('<trk><trkseg>', '<trk><type>RUNNING</type><trkseg>', a)
     with open("dupa/{}_{}.gpx".format(d, i), "w") as f:
         print('{}/{}'.format(b, len(k)))
         b += 1
