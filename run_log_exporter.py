@@ -1,6 +1,6 @@
 import re
 import requests
-
+from itertools import chain
 
 def open_run_log_session(user, passwd):
     run_log_session = requests.session()
@@ -27,10 +27,9 @@ def workout_ids(session, num_of_pages):
         page_code = session.get('https://run-log.com/training/list?page={}'.format(page_num))
         workouts = re.findall('show_workout\(\d+', page_code.text)
         return [extract_id(workout_str) for workout_str in workouts]
-    ids = []
-    for page_num in range(1, num_of_pages + 1):
-        ids += ids_from_page(page_num)
-    return ids
+    def get_ids(pages):
+        return [ids_from_page(page_num) for page_num in range(1, pages + 1)]
+    return list(chain(*get_ids(num_of_pages)))
 
 
 def gpx_ids(session, workouts):
@@ -49,8 +48,7 @@ def gpx_ids(session, workouts):
 
 
 run_log_session = open_run_log_session('Rysmen', 'testowe')
-n = workout_ids(run_log_session, get_num_of_pages(run_log_session))
-k = gpx_ids(run_log_session, n)
+k = gpx_ids(run_log_session, workout_ids(run_log_session, get_num_of_pages(run_log_session)))
 
 
 b = 0
