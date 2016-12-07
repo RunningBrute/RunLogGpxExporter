@@ -49,8 +49,7 @@ def gpx_ids(session, workouts):
 
 
 run_log_session = open_run_log_session('Rysmen', 'testowe')
-#n = workout_ids(run_log_session, get_num_of_pages(run_log_session))
-n = workout_ids(run_log_session, 1)
+n = workout_ids(run_log_session, get_num_of_pages(run_log_session))
 k = gpx_ids(run_log_session, n)
 
 
