@@ -2,18 +2,19 @@ import re
 import requests
 from itertools import chain
 
+RUNLOG_URL = 'https://run-log.com/'
 
 def open_run_log_session(user, passwd):
     run_log_session = requests.session()
-    run_log_session.post('https://run-log.com/account/login/', data={'username': user,
-                                                                     'password': passwd})
+    run_log_session.post(RUNLOG_URL + 'account/login/', data={'username': user,
+                                                              'password': passwd})
     return run_log_session
 
 
 def get_num_of_pages(session):
     def extract_pagenum(page_str):
         return int(page_str.replace('page=', ''))
-    training_list = session.get('https://run-log.com/training/list')
+    training_list = session.get(RUNLOG_URL + 'training/list')
     pages = re.findall('page=\d+', training_list.text)
     num_of_page = max([extract_pagenum(page_str) for page_str in pages])
     print('Found {} pages of training to download.'.format(num_of_page))
@@ -21,10 +22,11 @@ def get_num_of_pages(session):
 
 
 def workout_ids(session, num_of_pages):
+    url_template = RUNLOG_URL + 'training/list?page={}'
     def extract_id(s):
         return int(s.replace('show_workout(', ''))
     def ids_from_page(page_num):
-        page_code = session.get('https://run-log.com/training/list?page={}'.format(page_num))
+        page_code = session.get(url_template.format(page_num))
         workouts = re.findall('show_workout\(\d+', page_code.text)
         return [extract_id(workout_str) for workout_str in workouts]
     def get_ids(pages):
@@ -44,10 +46,11 @@ def get_date(page):
 
 
 def gpx_ids(session, workouts):
+    url_template = RUNLOG_URL + 'workout/workout_show/{}'
     print("Fetching workouts in search for gpx ids.")
     ids = []
     for count, workout_id in enumerate(workouts):
-        page_code = session.get('https://run-log.com/workout/workout_show/{}'.format(workout_id))
+        page_code = session.get(url_template.format(workout_id))
         print('{}/{}'.format(count + 1, len(workouts)))
         try:
             workout = get_id(page_code), get_date(page_code)
@@ -64,8 +67,9 @@ def save_gpx(gpx, id, day):
 
 
 def download_gpxies(session, ids):
+    url_template = RUNLOG_URL + 'tracks/export_workout_track/Rysmen/{}/gpx'
     def get_gpx(id):
-        return session.get('https://run-log.com/tracks/export_workout_track/Rysmen/{}/gpx'.format(id)).text
+        return session.get(url_template.format(id)).text
     def correct_dates(gpx):
         return re.sub('\d+-\d+-\d+', day, gpx)
     def fill_activity_type(gpx):
