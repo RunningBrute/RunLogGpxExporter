@@ -13,14 +13,16 @@ print(max_page)
 n = []
 
 for i in range(1, max_page + 1):
+    print(i)
     r = run_log_session.get('https://run-log.com/training/list?page={}'.format(i))
     m = re.findall('show_workout\(\d+', r.text)
     n += [int(j.replace('show_workout(', '')) for j in m]
         
 k = []
 
-for i in n:
+for number, i in enumerate(n):
     q = run_log_session.get('https://run-log.com/workout/workout_show/{}'.format(i))
+    print('{}/{}'.format(number, len(n)))
     try:
         z = re.findall('wt_id&quot;: \d+', q.text)[0]
         c = re.findall('Data:</span><span class="value">\d+-\d+-\d+', q.text)[0]
@@ -28,7 +30,9 @@ for i in n:
     except:
         print('No gpx!')
         pass
-       
+
+b = 0
+
 for i, d in k:
     r = run_log_session.get('https://run-log.com/tracks/export_workout_track/Rysmen/{}/gpx'.format(i))
     a = re.sub('\d+-\d+-\d+', d, r.text)
