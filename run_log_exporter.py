@@ -47,22 +47,16 @@ def gpx_ids(session, workouts):
     return k
 
 
+def download_gpxies(ids):
+    for count, (id, day) in enumerate(ids):
+        r = run_log_session.get('https://run-log.com/tracks/export_workout_track/Rysmen/{}/gpx'.format(id))
+        a = re.sub('\d+-\d+-\d+', day, r.text)
+        a = re.sub('<trk><trkseg>', '<trk><type>RUNNING</type><trkseg>', a)
+        with open("dupa/{}_{}.gpx".format(day, id), "w") as f:
+            print('{}/{}'.format(count, len(k)))
+            f.write(a)
+
+
 run_log_session = open_run_log_session('Rysmen', 'testowe')
 k = gpx_ids(run_log_session, workout_ids(run_log_session, get_num_of_pages(run_log_session)))
-
-
-b = 0
-
-for i, d in k:
-    r = run_log_session.get('https://run-log.com/tracks/export_workout_track/Rysmen/{}/gpx'.format(i))
-    a = re.sub('\d+-\d+-\d+', d, r.text)
-    a = re.sub('<trk><trkseg>', '<trk><type>RUNNING</type><trkseg>', a)
-    with open("dupa/{}_{}.gpx".format(d, i), "w") as f:
-        print('{}/{}'.format(b, len(k)))
-        b += 1
-        f.write(a)
-
-print(a)
-print(n)
-print(k)
-print(len(n))
+download_gpxies(k)
