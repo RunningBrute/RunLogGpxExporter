@@ -77,6 +77,6 @@ def download_gpxies(session, ids):
 
 
 run_log_session = open_run_log_session('Rysmen', 'testowe')
-#ids = gpx_ids(run_log_session, workout_ids(run_log_session, get_num_of_pages(run_log_session)))
-ids = gpx_ids(run_log_session, workout_ids(run_log_session, 1))
+ids = gpx_ids(run_log_session, workout_ids(run_log_session, get_num_of_pages(run_log_session)))
+#ids = gpx_ids(run_log_session, workout_ids(run_log_session, 1))
 download_gpxies(run_log_session, ids)
