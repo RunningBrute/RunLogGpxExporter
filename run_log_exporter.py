@@ -33,10 +33,6 @@ def workout_ids(session, num_of_pages):
     return ids
 
 
-run_log_session = open_run_log_session('Rysmen', 'testowe')
-n = workout_ids(run_log_session, get_num_of_pages(run_log_session))
-
-
 def gpx_ids(session):
     k = []
     for number, i in enumerate(n):
@@ -51,6 +47,9 @@ def gpx_ids(session):
             pass
     return k
 
+
+run_log_session = open_run_log_session('Rysmen', 'testowe')
+n = workout_ids(run_log_session, get_num_of_pages(run_log_session))
 k = gpx_ids()
 
 
