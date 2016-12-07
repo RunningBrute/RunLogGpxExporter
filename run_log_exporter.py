@@ -33,11 +33,11 @@ def workout_ids(session, num_of_pages):
     return ids
 
 
-def gpx_ids(session):
+def gpx_ids(session, workouts):
     k = []
-    for number, i in enumerate(n):
-        q = session.get('https://run-log.com/workout/workout_show/{}'.format(i))
-        print('{}/{}'.format(number, len(n)))
+    for count, workout_id in enumerate(workouts):
+        q = session.get('https://run-log.com/workout/workout_show/{}'.format(workout_id))
+        print('{}/{}'.format(count, len(workouts)))
         try:
             z = re.findall('wt_id&quot;: \d+', q.text)[0]
             c = re.findall('Data:</span><span class="value">\d+-\d+-\d+', q.text)[0]
@@ -50,7 +50,7 @@ def gpx_ids(session):
 
 run_log_session = open_run_log_session('Rysmen', 'testowe')
 n = workout_ids(run_log_session, get_num_of_pages(run_log_session))
-k = gpx_ids()
+k = gpx_ids(run_log_session, n)
 
 
 b = 0
