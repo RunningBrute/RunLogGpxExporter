@@ -1,4 +1,5 @@
 import re
+import sys
 import requests
 from itertools import chain
 
@@ -80,7 +81,10 @@ def download_gpxies(session, ids):
         save_gpx(gpx, id, day)
 
 
-run_log_session = open_run_log_session('Rysmen', 'testowe')
+username = sys.argv[1]
+password = sys.argv[2]
+
+run_log_session = open_run_log_session(username, password)
 ids = gpx_ids(run_log_session, workout_ids(run_log_session, get_num_of_pages(run_log_session)))
 #ids = gpx_ids(run_log_session, workout_ids(run_log_session, 1))
 download_gpxies(run_log_session, ids)
